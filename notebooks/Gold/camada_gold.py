@@ -19,6 +19,29 @@ df_silver = spark.read.table(f"{CATALOGO}.{SCHEMA_SILVER}.energia_consumo_silver
 print(f"Total de linhas lidas da Silver: {df_silver.count()}")
 df_silver.printSchema()
 
+
+# US-3.1: Agregaçãp Mensal Regional Total (Fato para Picos de Demanda)
+
+# 1. Definir o nível de agregação (Granularidade: Região e Mês)
+df_total_regional = df_silver.groupBy(
+    "regiao",
+    "mes_de_referencia"
+).agg(
+    F.sum("consumo_em_kwh").alias("consumo_total_kwh"),
+    F.sum("valor_da_conta").alias("custo_total"),
+    F.count("*").alias("total_registros") # Contagem para entender o volume
+)
+
+# 2. Persistência da Tabela Fato
+df_total_regional.write.format("delta") \
+    .mode("overwrite") \
+    .option("overwriteSchema", "true") \
+    .saveAsTable(f"{CATALOGO}.{SCHEMA_GOLD}.ft_consumo_mensal_regional")
+
+print("Tabela Fato ft_consumo_mensal_regional persistida com sucesso.")
+
+df_total_regional.show(5)
+
 # US-3.3: Criar a Tabela Dimensional D-Localidade
 
 
