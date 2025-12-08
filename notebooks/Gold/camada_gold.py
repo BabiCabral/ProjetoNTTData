@@ -42,6 +42,29 @@ print("Tabela Fato ft_consumo_mensal_regional persistida com sucesso.")
 
 df_total_regional.show(5)
 
+# US-3.2: Agregação por Tipo de Cliente (Fato para Custo/Rentabilidade)
+
+# 1. Definir o nível de agregação (Granularidade: Tipo de Cliente)
+df_custo_segmento = df_silver.groupBy(
+    "tipo_de_cliente"
+).agg(
+    F.sum("consumo_em_kwh").alias("consumo_total_kwh"),
+    F.sum("valor_da_conta").alias("custo_total"),
+    
+    # Métrica Chave: Custo médio por kWh para o segmento
+    (F.sum("valor_da_conta") / F.sum("consumo_em_kwh")).alias("custo_medio_por_kwh_segmento")
+)
+
+# 2. Persistência da Tabela Fato
+df_custo_segmento.write.format("delta") \
+    .mode("overwrite") \
+    .option("overwriteSchema", "true") \
+    .saveAsTable(f"{CATALOGO}.{SCHEMA_GOLD}.ft_custo_segmento")
+
+print("Tabela Fato ft_custo_segmento persistida com sucesso.")
+
+df_custo_segmento.show()
+
 # US-3.3: Criar a Tabela Dimensional D-Localidade
 
 
