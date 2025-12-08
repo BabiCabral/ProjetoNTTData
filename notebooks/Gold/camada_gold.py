@@ -121,3 +121,21 @@ print("Tabela Fato ft_consumo_mensal_comparativo persistida com sucesso.")
 
 
 df_consumo_agregado.show(5)
+
+# 03 - Agregação da Camada GOLD (Modelagem Dimensional)
+
+## Objetivo
+Criar o Modelo de Dados Dimensional (Tabelas FATO e DIMENSÃO) a partir dos dados limpos da Camada Silver, visando otimizar a performance de consultas e responder às User Stories de Negócio.
+
+## User Stories Concluídas
+* **US-3.5:** Criação da Dimensão D-Localidade.
+* **US-5:** Criação da Fato Comparativa (Geral vs. Limpa).
+* **US-3.1:** Criação da Fato Total Regional (Picos de Demanda).
+* **US-3.2:** Criação da Fato por Tipo de Cliente (Custo Médio).
+
+
+## Tabelas Finais Persistidas
+1.  **Dimensão:** `d_localidade` (Região, Cidade, Bairro, Localidade_SK)
+2.  **Fato 1 (Comparativa):** `ft_consumo_mensal_comparativo` (Agregada por Região, Mês, Tipo de Consumo)
+3.  **Fato 2 (Total):** `ft_consumo_total_regional` (Agregada por Região, Mês)
+4.  **Fato 3 (Segmento):** `ft_custo_por_segmento` (Agregada por Tipo de Cliente)
