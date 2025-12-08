@@ -45,3 +45,33 @@ print("Dimensão D-Localidade persistida com sucesso.")
 
 
 df_localidade_dim.show(5)
+
+# US-5: Agregação Mensal Regional Comparativa (Fato)
+
+
+# 1. Definir o nível de agregação (Granularidade)
+df_consumo_agregado = df_silver.groupBy(
+    "regiao",
+    "mes_de_referencia",
+    "tipo_de_consumo" # Chave principal para o comparativo
+).agg(
+    F.sum("consumo_em_kwh").alias("consumo_total_kwh"),
+    F.sum("valor_da_conta").alias("custo_total"),
+    F.sum("valor_de_imposto").alias("imposto_total"),
+   
+    # Métrica derivada: Custo médio por kWh
+    (F.sum("valor_da_conta") / F.sum("consumo_em_kwh")).alias("custo_medio_por_kwh")
+)
+
+
+# 2. Persistência da Tabela Fato
+df_consumo_agregado.write.format("delta") \
+    .mode("overwrite") \
+    .option("overwriteSchema", "true") \
+    .saveAsTable(f"{CATALOGO}.{SCHEMA_GOLD}.ft_consumo_mensal_comparativo")
+
+
+print("Tabela Fato ft_consumo_mensal_comparativo persistida com sucesso.")
+
+
+df_consumo_agregado.show(5)
